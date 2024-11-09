@@ -27,18 +27,22 @@ from pymoo.algorithms.moo.sms import SMSEMOA  # SMS-EMOA
 # plot(zdt6.pareto_front(), no_fill=True)
 
 # ref. https://pymoo.org/algorithms/moo/sms.html
-problem = get_problem("zdt6")
+# problem = get_problem("zdt6")
 
-algorithm = SMSEMOA()
+D = [5, 10, 30] # number of decision variables (hav to test for each value)
+M = 2           # number of objectives (fixed due to the benchmark problem)
 
-res = minimize(problem,
-               algorithm,
-               ('n_gen', 200),
-               seed=1,
-               verbose=True,
-               save_history=True)
-
-plot = Scatter()
-plot.add(problem.pareto_front(), plot_type="line", color="black", alpha=0.7)
-plot.add(res.F, color="red")
-plot.show()
+for d in D:
+    problem = get_problem("zdt6", n_var=d)
+    algorithm = SMSEMOA()
+    res = minimize(problem,
+                   algorithm,
+                   termination = ('n_gen', 200),
+                   seed=1,
+                   verbose=True,
+                   save_history=True)
+    
+    plot = Scatter()
+    plot.add(problem.pareto_front(), plot_type="line", color="black", alpha=0.7)
+    plot.add(res.F, color="red")
+    plot.show()
