@@ -12,6 +12,12 @@ from pymoo.optimize import minimize
 
 # algorithms 
 from pymoo.algorithms.moo.sms import SMSEMOA  # SMS-EMOA
+from pymoo.algorithms.moo.nsga2 import NSGA2  # NSGA-II
+
+# termination criteria
+from pymoo.core.termination import Termination
+from pymoo.termination.xtol import DesignSpaceTermination
+from pymoo.termination.robust import RobustTermination
 
 # The following loads in and shows the pareto optimal fronts. 
 # zdt1 = get_problem("zdt1")
@@ -34,10 +40,13 @@ M = 2           # number of objectives (fixed due to the benchmark problem)
 
 for d in D:
     problem = get_problem("zdt6", n_var=d)
-    algorithm = SMSEMOA()
+    # algorithm = NSGA2() # NSGA-II
+    algorithm = SMSEMOA() # SMS-EMOA
+    # termination = get_termination("n_gen", 200) # number of generations
+    termination = RobustTermination(DesignSpaceTermination(tol=0.001), period=20) # xtol termination
     res = minimize(problem,
                    algorithm,
-                   termination = ('n_gen', 200),
+                   termination,
                    seed=1,
                    verbose=True,
                    save_history=True)
