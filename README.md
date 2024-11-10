@@ -9,5 +9,7 @@ Must create a model based on either Hypervolume, IGD or R2 indicators, where thi
 
 I will need a better termination indicator to say when its complete - i.e., some level of acceptable error from the front. 
 
+A model for the indicator itself? 
+
 # Keywords 
 **IBEA** - Indicator-Based Multi-Objective Evolutionary Algorithm
