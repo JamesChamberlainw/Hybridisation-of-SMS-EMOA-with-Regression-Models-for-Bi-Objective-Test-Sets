@@ -5,8 +5,12 @@ from pymoo.optimize import minimize
 from pymoo.algorithms.moo.sms import SMSEMOA  # SMS-EMOA
 from pymoo.visualization.scatter import Scatter
 
+import time
+
 # models
-from sklearn import linear_model
+# from sklearn import linear_model
+from sklearn.gaussian_process import GaussianProcessRegressor
+
 
 # needed for MyLeastHypervolumeContributionSurvival
 from pymoo.core.population import Population
@@ -30,6 +34,8 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
     __model__ = None
     __model_initialised__ = False
 
+    __n_model_swap__ = 10
+
     __bool_model_eval__ = False
     __counter_model_eval__ = 0
 
@@ -40,7 +46,8 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
 
         if not self.__model_initialised__:
             print("Model Initialised")
-            self.__model__ = linear_model.LinearRegression()
+            # self.__model__ = linear_model.LinearRegression()
+            self.__model__ = GaussianProcessRegressor()
             self.__model_initialised__ = True
 
         # get the objective space values and objects
@@ -84,10 +91,10 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                 hv = None
 
                 if self.__model_initialised__:
-                    if self.__bool_model_eval__ and self.__counter_model_eval__ <= 5: # true
+                    if self.__bool_model_eval__ and self.__counter_model_eval__ <= self.__n_model_swap__: # true
                         hv = self.__model__.predict(F)
                         self.__counter_model_eval__ += 1
-                        if self.__counter_model_eval__ >= 5:
+                        if self.__counter_model_eval__ >= self.__n_model_swap__:
                             self.__bool_model_eval__ = False
                             self.__counter_model_eval__ = 0
                             print("Now Based on Original Evaluated")
@@ -101,7 +108,7 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                         self.__counter_model_eval__ += 1
                 
 
-                        if self.__counter_model_eval__ >= 5:
+                        if self.__counter_model_eval__ >= self.__n_model_swap__:
                             self.__bool_model_eval__ = True
                             self.__counter_model_eval__ = 0
                             print("Now Based on Model Evaluated")
@@ -132,14 +139,15 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
         # return super()._do(problem, pop, *args, n_survive=n_survive, ideal=ideal, nadir=nadir, **kwargs) # original implementation 
 
 # The Problem 
-problem = get_problem("zdt5")
+problem = get_problem("zdt1", n_var = 5)
+
 algorithm = SMSEMOA(survival=MyLeastHypervolumeContributionSurvival()) # key argument for this project DO NOT FORGET!!! 
 # algorithm = SMSEMOA() # default 
 
 # Run the Optimization
 res = minimize(problem,
                algorithm,
-               termination=('n_gen', 100),
+               termination=('n_gen', 140),
                seed=1,
                save_history=True,
                verbose=True)
@@ -173,3 +181,6 @@ F = res.pop.get("F")
 #     plot.add(problem.pareto_front(), plot_type="line", color="black", alpha=0.7)
 #     plot.add(res.F, color="red")
 #     plot.show()
+
+
+# treat evaluations as time - as less evals = better 
