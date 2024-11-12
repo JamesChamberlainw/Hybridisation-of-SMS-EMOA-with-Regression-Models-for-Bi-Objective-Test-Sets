@@ -1,7 +1,5 @@
 import numpy as np
 
-# useful imports from the pymoo library - list from SMS-EMOA pymoo file 
-
 # other 
 import pymoo as pm
 from pymoo.problems import get_problem
@@ -18,6 +16,27 @@ from sklearn.ensemble import RandomForestRegressor
 # ref. https://github.com/anyoptimization/pymoo/blob/main/pymoo/algorithms/moo/sms.py#L26 
 
 
+# ==============================================================================================================
+# ==============================================================================================================
+# ==============================================================================================================
+# ref. https://github.com/anyoptimization/pymoo/blob/main/pymoo/algorithms/moo/sms.py#L14 
+# ==============================================================================================================
+# ==============================================================================================================
+
+# custom survival function - this is the main class that is extended from the pymoo library
+
+from pymoo.algorithms.moo.sms import LeastHypervolumeContributionSurvival
+
+class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurvival):
+
+    def __init__(self, eps=10.0) -> None:
+        super().__init__(eps=eps)
+
+    # def _do # todo
+
+# ==============================================================================================================
+# ==============================================================================================================
+# ==============================================================================================================
 
 class HySMSEMOA(SMSEMOA):
 
@@ -29,6 +48,7 @@ class HySMSEMOA(SMSEMOA):
 
     def __init__(self):
         super().__init__()
+        # super().__init__(survival=MyLeastHypervolumeContributionSurvival())
   
     def suggest_solutions(self, num_suggestions, n_var, xu, xl):
         xu = np.array(xu).reshape(1, n_var)
@@ -84,13 +104,11 @@ class HySMSEMOA(SMSEMOA):
 problem = get_problem("zdt1")
 algorithm = HySMSEMOA()
 # algorithm = SMSEMOA()
-# survival = MyLeastHypervolumeContributionSurvival()
 
 # Run the Optimization
 res = minimize(problem,
                algorithm,
                termination=('n_gen', 100),
-            #    survival=survival,
                seed=1,
                save_history=True,
                verbose=True)
