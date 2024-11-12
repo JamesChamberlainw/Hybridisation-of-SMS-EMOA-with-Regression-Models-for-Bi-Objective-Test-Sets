@@ -8,15 +8,31 @@ from pymoo.visualization.scatter import Scatter
 import time
 
 # models
-# from sklearn import linear_model
+from sklearn import linear_model
 from sklearn.gaussian_process import GaussianProcessRegressor
 
+# randomForrestReg
+from sklearn.ensemble import RandomForestRegressor
 
-# needed for MyLeastHypervolumeContributionSurvival
+# SVR polynomial
+from sklearn.svm import SVR
+
+# plotting
+import matplotlib.pyplot as plt
+
+# LeastHypervolumeContributionSurvival
 from pymoo.core.population import Population
 from pymoo.indicators.hv.exact import ExactHypervolume
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 from pymoo.util.normalization import normalize
+
+# indicator
+from pymoo.indicators.hv import Hypervolume 
+
+# hypervolume
+from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
+from pymoo.util.normalization import normalize
+
 
 # SMS-EMOA Pymoo Implementation  - this project is extended from this class and files 
 # ref. https://github.com/anyoptimization/pymoo/blob/main/pymoo/algorithms/moo/sms.py#L26 
@@ -33,22 +49,38 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
 
     __model__ = None
     __model_initialised__ = False
+    __new_behaviour__ = True
+
+    _ot_evals = []
+    ___gen = 0
 
     __n_model_swap__ = 10
 
     __bool_model_eval__ = False
-    __counter_model_eval__ = 0
+    __counter_model_eval__ = 1 # stats at so it swaps on the 10th evaluation
 
-    def __init__(self, eps=10.0) -> None:
+    # statistic variables 
+    eval_counter__ = 0                  # all evaluations perfromed by the model
+    eval_counter_all_potential__ = 0    # all potential evaluations even those that are not performed due to the model
+
+    def __init__(self, eps=10.0, num_between_model_swaps=10, model = None) -> None:
+        """
+            if model is None -> default behaviour is set to True
+                this only exists for test purposes for comparison with original implementation
+        """
+
+        if num_between_model_swaps is not None and num_between_model_swaps > 0: # has to be greater than 0
+            self.__n_model_swap__ = num_between_model_swaps
+
+        if model is not None: # default model is None so default behaviour is set to True
+            self.__model__ = model
+            self.__model_initialised__ = True
+        
+        
+        # finish with the original constructors behaviour
         super().__init__(eps=eps)
 
     def _do(self, problem, pop, *args, n_survive=None, ideal=None, nadir=None, **kwargs):
-
-        if not self.__model_initialised__:
-            print("Model Initialised")
-            # self.__model__ = linear_model.LinearRegression()
-            self.__model__ = GaussianProcessRegressor()
-            self.__model_initialised__ = True
 
         # get the objective space values and objects
         F = pop.get("F").astype(float, copy=False)
@@ -94,11 +126,15 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                     if self.__bool_model_eval__ and self.__counter_model_eval__ <= self.__n_model_swap__: # true
                         hv = self.__model__.predict(F)
                         self.__counter_model_eval__ += 1
+
+                        # counters for statistics
+                        self.eval_counter_all_potential__ += 1    # counter for testing purposes
+                        self._ot_evals.append(Hypervolume(ref_point = ref_point).do(F))
                         if self.__counter_model_eval__ >= self.__n_model_swap__:
                             self.__bool_model_eval__ = False
                             self.__counter_model_eval__ = 0
                             print("Now Based on Original Evaluated")
-
+                            # self.__n_model_swap__ += 5   
 
                         self.___current_hv___ = False
 
@@ -106,7 +142,13 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                         hv = clazz(ref_point).add(F)
                         self.__model__.fit(F, hv.hvc)
                         self.__counter_model_eval__ += 1
-                
+
+                        self._ot_evals.append(Hypervolume(ref_point = ref_point).do(F))
+
+
+                        # counters for statistics
+                        self.eval_counter__ += 1    # counter for testing purposes
+                        self.eval_counter_all_potential__ += 1 # all potential evaluations even those that are not performed due to the model
 
                         if self.__counter_model_eval__ >= self.__n_model_swap__:
                             self.__bool_model_eval__ = True
@@ -117,6 +159,8 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                 else:
                     hv = clazz(ref_point).add(F)
                     self.___current_hv___ = True
+
+                    self.eval_counter__ += 1    # counter for testing purposes
 
 
                 # current front sorted by crowding distance if splitting
@@ -135,13 +179,26 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
             # extend the survivors by all or selected individuals
             survivors.extend(front)
 
+            # print(f"Current Front: {k} - Survivors: {len(survivors)} - Eval Counter: {self.eval_counter__} out of {self.eval_counter_all_potential__}")
+
+            # if last display overtime evaluations
+            if self.eval_counter_all_potential__ == 138:
+                print("Overtime Evaluations: ")
+                # 139
+                x = np.arange(0, len(self._ot_evals), 1)
+                plt.plot(x, self._ot_evals)
+                plt.show()
+
+
         return Population.create(*survivors)
         # return super()._do(problem, pop, *args, n_survive=n_survive, ideal=ideal, nadir=nadir, **kwargs) # original implementation 
 
 # The Problem 
-problem = get_problem("zdt1", n_var = 5)
+problem = get_problem("zdt3", n_var = 5)
 
-algorithm = SMSEMOA(survival=MyLeastHypervolumeContributionSurvival()) # key argument for this project DO NOT FORGET!!! 
+# model = GaussianProcessRegressor()
+model = linear_model.LinearRegression()
+algorithm = SMSEMOA(survival=MyLeastHypervolumeContributionSurvival(model=model, num_between_model_swaps=3)) # key argument for this project DO NOT FORGET!!! 
 # algorithm = SMSEMOA() # default 
 
 # Run the Optimization
