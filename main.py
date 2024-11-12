@@ -1,5 +1,4 @@
 import numpy as np
-import pymoo as pm
 
 from pymoo.problems import get_problem
 from pymoo.optimize import minimize
@@ -9,25 +8,9 @@ from pymoo.visualization.scatter import Scatter
 # models
 from sklearn import linear_model
 
-# ridge 
-from sklearn.linear_model import RidgeClassifier
-
-
 # needed for MyLeastHypervolumeContributionSurvival
-from pymoo.algorithms.base.genetic import GeneticAlgorithm
 from pymoo.core.population import Population
-from pymoo.core.survival import Survival
-from pymoo.docs import parse_doc_string
 from pymoo.indicators.hv.exact import ExactHypervolume
-from pymoo.indicators.hv.exact_2d import ExactHypervolume2D
-from pymoo.indicators.hv.monte_carlo import ApproximateMonteCarloHypervolume
-from pymoo.operators.crossover.sbx import SBX
-from pymoo.operators.mutation.pm import PM
-from pymoo.operators.sampling.rnd import FloatRandomSampling
-from pymoo.operators.selection.tournament import compare, TournamentSelection
-from pymoo.util.display.multi import MultiObjectiveOutput
-from pymoo.util.dominator import Dominator
-from pymoo.util.function_loader import load_function
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 from pymoo.util.normalization import normalize
 
@@ -96,78 +79,62 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                 _, n_obj = F.shape
 
                 # choose the suitable hypervolume method
-                clazz = ExactHypervolume
-                if n_obj == 2:
-                    clazz = ExactHypervolume2D
-                elif n_obj > 3:
-                    clazz = ApproximateMonteCarloHypervolume
+                clazz = ExactHypervolume # default behaviour for training the model
 
-
-                ## CHANGES MADE HERE 
                 hv = None
 
                 if self.__model_initialised__:
-                    if self.__bool_model_eval__ and self.__counter_model_eval__ <= 10: # true
-                        print("Model Evaluated")
+                    if self.__bool_model_eval__ and self.__counter_model_eval__ <= 5: # true
                         hv = self.__model__.predict(F)
                         self.__counter_model_eval__ += 1
-                        if self.__counter_model_eval__ <= 10:
+                        if self.__counter_model_eval__ >= 5:
                             self.__bool_model_eval__ = False
                             self.__counter_model_eval__ = 0
+                            print("Now Based on Original Evaluated")
+
+
+                        self.___current_hv___ = False
+
                     else: 
-                        # print("Fitting New Data", self.__counter_model_eval__)
-                        # print(ref_point)
-                        # print(F.shape)
-                        # print(len(F))
-
                         hv = clazz(ref_point).add(F)
-
-                        # print("hv:", hv.hv)
-                        # print("hvc:", len(hv.hvc))
-
-                        # print(type(F))
-                        # print(type(hv.hvc))
-
-                        # crash here (as incompatible at the moment)
                         self.__model__.fit(F, hv.hvc)
                         self.__counter_model_eval__ += 1
                 
 
-                        if self.__counter_model_eval__ >= 10:
-                            print("over 10")
+                        if self.__counter_model_eval__ >= 5:
                             self.__bool_model_eval__ = True
                             self.__counter_model_eval__ = 0
+                            print("Now Based on Model Evaluated")
+                        
+                        self.___current_hv___ = True
                 else:
-                    print("Model Not Initialised: Original Behaviour")
                     hv = clazz(ref_point).add(F)
+                    self.___current_hv___ = True
 
-
-
-                ## END OF CHANGES
-
-                # calculate the hypervolume contribution 
-                # hv = clazz(ref_point).add(F)
 
                 # current front sorted by crowding distance if splitting
                 while len(survivors) + len(front) > n_survive:
-                    k = hv.hvc.argmin()
-                    hv.delete(k)
-                    front = np.delete(front, k)
-
-                # 
+                    if self.___current_hv___:
+                        k = hv.hvc.argmin()
+                        hv.delete(k)
+                        front = np.delete(front, k)
+                    else:
+                        k = hv.argmin()
+                        # remove the individual from the front array
+                        hv = np.delete(hv, k)
+                        # hv = hv.delete(hv.indexof(k))
+                        front = np.delete(front, k)
 
             # extend the survivors by all or selected individuals
             survivors.extend(front)
 
         return Population.create(*survivors)
-
-        
-        # return super()._do(problem, pop, *args, n_survive=n_survive, ideal=ideal, nadir=nadir, **kwargs)
+        # return super()._do(problem, pop, *args, n_survive=n_survive, ideal=ideal, nadir=nadir, **kwargs) # original implementation 
 
 # The Problem 
-problem = get_problem("zdt1")
-# algorithm = HySMSEMOA()
+problem = get_problem("zdt5")
 algorithm = SMSEMOA(survival=MyLeastHypervolumeContributionSurvival()) # key argument for this project DO NOT FORGET!!! 
+# algorithm = SMSEMOA() # default 
 
 # Run the Optimization
 res = minimize(problem,
