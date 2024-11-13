@@ -96,7 +96,7 @@ for model in models:
             print(row)
 
             # # Result Visualization
-            # plot = Scatter()
-            # plot.add(p.pareto_front(), plot_type="line", color="black", alpha=0.7)
-            # plot.add(res.F, color="red")
-            # plot.show()
+            # plot = vis(res, p.pareto_front())
+            # plot.display_front()
+            # plot.display_hypervolume_overtime()
+            # plot.display_aprox_contrib_overtime()
