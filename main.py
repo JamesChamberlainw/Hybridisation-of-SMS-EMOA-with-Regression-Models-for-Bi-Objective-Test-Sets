@@ -52,10 +52,8 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
 
     __model__ = None
     __model_initialised__ = False
-    __new_behaviour__ = True
 
     _ot_evals = []
-    ___gen = 0
 
     __n_model_swap__ = 10
 
@@ -78,8 +76,7 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
         if model is not None: # default model is None so default behaviour is set to True
             self.__model__ = model
             self.__model_initialised__ = True
-        
-        
+
         # finish with the original constructors behaviour
         super().__init__(eps=eps)
 
@@ -93,9 +90,6 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
             ideal = F.min(axis=0)
         if nadir is None:
             nadir = F.max(axis=0)
-
-        # the number of objectives
-        _, n_obj = F.shape
 
         # the final indices of surviving individuals
         survivors = []
@@ -117,8 +111,6 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
 
                 # define the reference point and shift it a bit - F is already normalized!
                 ref_point = np.full(problem.n_obj, 1.0 + self.eps)
-
-                _, n_obj = F.shape
 
                 # choose the suitable hypervolume method
                 clazz = ExactHypervolume # default behaviour for training the model
