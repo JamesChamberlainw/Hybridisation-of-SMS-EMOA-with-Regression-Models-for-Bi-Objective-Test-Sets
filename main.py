@@ -1,7 +1,8 @@
-# my files - hybridsms.py
+# my files - hybridsms.py and visulisation.py
 from hybridsms import MyLeastHypervolumeContributionSurvival
 from hybridsms import Hy_SMSEMOA
 from hybridsms import hy_minimize
+from visulisation import vis   
 
 # plotting and maths
 import numpy as np
@@ -26,6 +27,24 @@ from sklearn.linear_model import SGDRegressor
 from sklearn.neural_network import MLPClassifier
 import sklearn.svm 
 
+# decimal rounding
+rounding = 4
+
+# list of where default sms-emoa converges for each problem (max value)
+convergance_dict = {
+    "zdt1": [40, 70, 140],
+    "zdt3": [40, 70, 120],
+    "zdt4": [130, 190, 670],
+    "zdt6": [130, 230, 600]
+}
+
+# comparison values for hypervolume for each problem (similarity)
+smsdefualt_hypervolume_dict = {
+    "zdt1": [0.8706010094731254, 0.8701004215097737, 0.8667542151989153],
+    "zdt3": [1.326932799989349, 1.3251498767866068, 1.3132467347404106],
+    "zdt4": [0.8711174340219447, 0.8630376835162556, 0.8508551733759164],
+    "zdt6": [0.4959617673719027, 0.4903102556919033, 0.4898010767283024]
+}
 
 D = [5, 10, 30]                                                 # number of decision variables (hav to test for each value)
 # M = 2                                                           # number of objectives (fixed due to the benchmark problem)
@@ -36,8 +55,8 @@ ref_points = [[1.1, 1.1], [1.1, 1.1], [1.1, 1.1], [1.1, 1.1]]   # reference poin
 models = []
 models.append([SVR(kernel='poly'), "svr_poly"])
 # models.append([GaussianProcessRegressor(), "gaussian_process"])
-# models.append([RandomForestRegressor(), "random_forest"])
-# models.append([linear_model.LinearRegression(), "linear_regression"])
+models.append([RandomForestRegressor(), "random_forest"])
+models.append([linear_model.LinearRegression(), "linear_regression"])
 # model.append([SVR(kernel='rbf'), "svr_rbf"])
 # model.append([SVR(kernel='sigmoid'), "svr_sigmoid"])
 # model.append([linear_model.BayesianRidge(), "bayesian_ridge"])
@@ -58,11 +77,13 @@ for model in models:
             # The Algorithm
             algorithm = Hy_SMSEMOA(survival=MyLeastHypervolumeContributionSurvival(model=m, num_between_model_swaps=10))
 
+            n_gen = convergance_dict[problem][D.index(D[i])]    
+
             # Run the Optimization
             res = hy_minimize(p,
                             algorithm=algorithm,
                             seed=1,
-                            termination=('n_gen', 140),
+                            termination=('n_gen', n_gen),
                             save_history=True,
                             verbose=False)
 
@@ -71,7 +92,7 @@ for model in models:
             ind = HV(ref_point)
             hv_value = ind(res.F)
 
-            row = f"{model[1]},  {problem},  {D[i]} : {hv_value}"
+            row = f"{model[1]}, {problem},  {D[i]} : {round(hv_value, rounding)} with similarity {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} at {n_gen} generations"
             print(row)
 
             # # Result Visualization
