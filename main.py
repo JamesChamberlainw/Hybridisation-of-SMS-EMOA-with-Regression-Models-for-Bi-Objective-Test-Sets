@@ -92,11 +92,14 @@ for model in models:
             ind = HV(ref_point)
             hv_value = ind(res.F)
 
-            row = f"{model[1]}, {problem},  {D[i]} : {round(hv_value, rounding)} with similarity {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} at {n_gen} generations"
+            row = f"{model[1]}, {problem},  {D[i]} : {round(hv_value, rounding)} with similarity {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} at {n_gen} generations, {res.total_evals} evaluations performed out of {res.total_evals_potential} potential evaluations "
             print(row)
 
-            # # Result Visualization
-            plot = vis(res, p.pareto_front())
-            plot.display_front()
-            plot.display_hypervolume_overtime()
-            plot.display_aprox_contrib_overtime()
+# res.total_evals = algorithm.survival.eval_counter__ # total evaluations performed by the not by the model
+    # res.total_evals_potential 
+
+            # # # Result Visualization
+            # plot = vis(res, p.pareto_front())
+            # plot.display_front()
+            # plot.display_hypervolume_overtime()
+            # plot.display_aprox_contrib_overtime()

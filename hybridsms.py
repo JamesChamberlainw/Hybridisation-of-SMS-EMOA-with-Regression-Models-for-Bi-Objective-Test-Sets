@@ -209,5 +209,7 @@ def hy_minimize(problem, algorithm=Hy_SMSEMOA, termination=None, copy_algorithm=
     res.hv_actual_contrib = extra_stats[2]              # actual      calculated hypervolume contribution
     res.hv_missing_evals_unused = extra_stats[3]        # missing   evaluations  hypervolume contribution
     res.hv_mean_contrib = extra_stats[4]                # mean of the calculated hypervolume contribution
+    res.total_evals = algorithm.survival.eval_counter__ # total evaluations performed by the not by the model
+    res.total_evals_potential = algorithm.survival.eval_counter_all_potential__ # total evaluations including the ones by the model
 
     return res
