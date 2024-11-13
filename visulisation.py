@@ -39,7 +39,7 @@ class vis:
         plt.plot(x, self.__res__.hv_actual_contrib, label="Actual Contribution (training data)")
         plt.plot(x, self.__res__.hv_aprox_contrib, label="Model Contribution (aprox)")
         plt.plot(x, self.__res__.hv_missing_evals_unused, label="Actual Contribution (unused values)")
-        plt.plot(x, self.__res__.hv_mean_contrib, label="Mean Contribution for SMS-EMOA")
+        plt.plot(x, self.__res__.hv_mean_contrib, label="Mean Contribution (for used values)")
         plt.legend()
         plt.show()
 
