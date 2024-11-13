@@ -129,7 +129,7 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
 
                         self.__hv_actual_over_time__.append(Hypervolume(ref_point = ref_point).do(F))       # append the actual hypervolume
                         self.__hv_actual_contrib_over_time__.append(sum(hv.hvc))                            # append actual hyper volume contribution (whats being calculated by hv here hv.hvc)
-                        self.__hv_mean_contrib_over_time__.append(np.mean(hv.hvc))                               # append the mean of the predicted points hypervolume
+                        self.__hv_mean_contrib_over_time__.append(np.mean(hv.hvc))                          # append the mean of the predicted points hypervolume
                         self.__hv_aprox_contrib_over_time__.append(np.NaN)                                  # append NAN as no prediction is made
                         self.__missing_evals_unused__.append(np.NaN)                                        # append NAN as its actually calculated so no need to append extra data
 
@@ -171,8 +171,6 @@ class Hy_SMSEMOA(SMSEMOA):
 
     def get_extra_stats(self):
         return self.survival.__hv_actual_over_time__, self.survival.__hv_aprox_contrib_over_time__, self.survival.__hv_actual_contrib_over_time__, self.survival.__missing_evals_unused__, self.survival.__hv_mean_contrib_over_time__
-            # actual hypervolume, approximate calculated hypervolume, actual hypervolume contribution, missing evaluations hypervolume contribution
-
 
 # custom minminise function
 def hy_minimize(problem, algorithm=Hy_SMSEMOA, termination=None, copy_algorithm=True, copy_termination=True, **kwargs):
