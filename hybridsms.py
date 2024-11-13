@@ -108,7 +108,7 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
 
                         # counters for statistics
                         self.eval_counter_all_potential__ += 1    # counter for testing purposes
-                        self.__hv_actual_over_time__.append(Hypervolume(ref_point = ref_point).do(F))       # append the actual hypervolume
+                        self.__hv_actual_over_time__.append(Hypervolume(ref_point = [1.1,1.1]).do(F))       # append the actual hypervolume
                         self.__hv_actual_contrib_over_time__.append(np.NaN)                                 # append NAN as no prediction is made
                         self.__hv_aprox_contrib_over_time__.append(sum(hv))                                 # append contribution of the predicted points hypervolume (whats being calculated here)
                         self.__missing_evals_unused__.append(sum(clazz(ref_point).add(F).hvc))                         # append actual hyper volume contribution (whats being calculated by hv here hv.hvc)
@@ -127,7 +127,7 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                         pred_hv = self.__model__.predict(F) 
                         self.__average_error__ = np.mean(hv.hvc - pred_hv) # calculate the average error for the model
 
-                        self.__hv_actual_over_time__.append(Hypervolume(ref_point = ref_point).do(F))       # append the actual hypervolume
+                        self.__hv_actual_over_time__.append(Hypervolume(ref_point = [1.1,1.1]).do(F))       # append the actual hypervolume
                         self.__hv_actual_contrib_over_time__.append(sum(hv.hvc))                            # append actual hyper volume contribution (whats being calculated by hv here hv.hvc)
                         self.__hv_mean_contrib_over_time__.append(np.mean(hv.hvc))                          # append the mean of the predicted points hypervolume
                         self.__hv_aprox_contrib_over_time__.append(np.NaN)                                  # append NAN as no prediction is made
@@ -144,7 +144,7 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                 else:
                     hv = clazz(ref_point).add(F)
                     self.___current_hv___ = True
-                    self.__hv_actual_over_time__.append(Hypervolume(ref_point = ref_point).do(F))
+                    self.__hv_actual_over_time__.append(Hypervolume(ref_point = [1.1, 1.1]).do(F)) # DO NOT CHANGE REF_POINT AS ITS FOR EXTERNAL USE NOT INTERNAL 
                     self.__hv_aprox_contrib_over_time__.append(np.NaN)
                     self.__missing_evals_unused__.append(np.NaN)
 

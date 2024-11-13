@@ -55,8 +55,8 @@ ref_points = [[1.1, 1.1], [1.1, 1.1], [1.1, 1.1], [1.1, 1.1]]   # reference poin
 models = []
 models.append([SVR(kernel='poly'), "svr_poly"])
 # models.append([GaussianProcessRegressor(), "gaussian_process"])
-models.append([RandomForestRegressor(), "random_forest"])
-models.append([linear_model.LinearRegression(), "linear_regression"])
+# models.append([RandomForestRegressor(), "random_forest"])
+# models.append([linear_model.LinearRegression(), "linear_regression"])
 # model.append([SVR(kernel='rbf'), "svr_rbf"])
 # model.append([SVR(kernel='sigmoid'), "svr_sigmoid"])
 # model.append([linear_model.BayesianRidge(), "bayesian_ridge"])
@@ -96,7 +96,7 @@ for model in models:
             print(row)
 
             # # Result Visualization
-            # plot = vis(res, p.pareto_front())
-            # plot.display_front()
-            # plot.display_hypervolume_overtime()
-            # plot.display_aprox_contrib_overtime()
+            plot = vis(res, p.pareto_front())
+            plot.display_front()
+            plot.display_hypervolume_overtime()
+            plot.display_aprox_contrib_overtime()
