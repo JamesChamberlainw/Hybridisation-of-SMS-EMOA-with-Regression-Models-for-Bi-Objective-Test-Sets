@@ -17,6 +17,9 @@ from sklearn.ensemble import RandomForestRegressor
 # SVR polynomial
 from sklearn.svm import SVR
 
+# stockastic gradient descent
+from sklearn.linear_model import SGDRegressor
+
 # plotting
 import matplotlib.pyplot as plt
 
@@ -134,8 +137,6 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                             self.__bool_model_eval__ = False
                             self.__counter_model_eval__ = 0
                             print("Now Based on Original Evaluated")
-                            # self.__n_model_swap__ += 5   
-
                         self.___current_hv___ = False
 
                     else: 
@@ -182,7 +183,7 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
             # print(f"Current Front: {k} - Survivors: {len(survivors)} - Eval Counter: {self.eval_counter__} out of {self.eval_counter_all_potential__}")
 
             # if last display overtime evaluations
-            if self.eval_counter_all_potential__ == 138:
+            if self.eval_counter_all_potential__ == 120:
                 print("Overtime Evaluations: ")
                 # 139
                 x = np.arange(0, len(self._ot_evals), 1)
@@ -194,11 +195,18 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
         # return super()._do(problem, pop, *args, n_survive=n_survive, ideal=ideal, nadir=nadir, **kwargs) # original implementation 
 
 # The Problem 
-problem = get_problem("zdt3", n_var = 5)
+problem = get_problem("zdt3", n_var = 30)
 
 # model = GaussianProcessRegressor()
-model = linear_model.LinearRegression()
-algorithm = SMSEMOA(survival=MyLeastHypervolumeContributionSurvival(model=model, num_between_model_swaps=3)) # key argument for this project DO NOT FORGET!!! 
+# model = linear_model.BayesianRidge()
+# model = RandomForestRegressor()
+# model = SVR(kernel='linear')
+model = SVR(kernel='poly')          # incredible resutls with 4/5 with major coverage (tiny gap) with 1/5 with minor coverage
+# model = SVR(kernel='rbf')         # all found full coverage on 40% and the rest with partial with one poor coverage
+# model = SVR(kernel='sigmoid')   # good results 4/5 zdt3 n_var = 30
+# model = SGDRegressor()
+# model = linear_model.LinearRegression()
+algorithm = SMSEMOA(survival=MyLeastHypervolumeContributionSurvival(model=model, num_between_model_swaps=10)) # key argument for this project DO NOT FORGET!!! 
 # algorithm = SMSEMOA() # default 
 
 # Run the Optimization
