@@ -26,6 +26,8 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
 
     __model__ = None
     __model_initialised__ = False
+    
+    __average_error__ = 0.0
 
     # missing evaluations hypervolume contribution - NOT USED AT ALL BUT STILL CALCULATED FOR STATISTICAL PURPOSES
     __missing_evals_unused__ = []
@@ -101,7 +103,7 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
 
                 if self.__model_initialised__:
                     if self.__bool_model_eval__ and self.__counter_model_eval__ <= self.__n_model_swap__: # true
-                        hv = self.__model__.predict(F)
+                        hv = self.__model__.predict(F) + self.__average_error__ # - average error to get a better approximation
                         self.__counter_model_eval__ += 1
 
                         # counters for statistics
@@ -121,6 +123,9 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                         hv = clazz(ref_point).add(F)
                         self.__model__.fit(F, hv.hvc)
                         self.__counter_model_eval__ += 1
+
+                        pred_hv = self.__model__.predict(F) 
+                        self.__average_error__ = np.mean(hv.hvc - pred_hv) # calculate the average error for the model
 
                         self.__hv_actual_over_time__.append(Hypervolume(ref_point = ref_point).do(F))       # append the actual hypervolume
                         self.__hv_actual_contrib_over_time__.append(sum(hv.hvc))                            # append actual hyper volume contribution (whats being calculated by hv here hv.hvc)
