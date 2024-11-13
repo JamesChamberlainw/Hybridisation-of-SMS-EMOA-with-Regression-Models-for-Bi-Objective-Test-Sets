@@ -1,6 +1,6 @@
 # my files - hybridsms.py
-import hybridsms.MyLeastHypervolumeContributionSurvival as MyLeastHypervolumeContributionSurvival
-import hybridsms.Hy_SMSEMOA as Hy_SMSEMOA
+from hybridsms import MyLeastHypervolumeContributionSurvival
+from hybridsms import Hy_SMSEMOA
 from hybridsms import hy_minimize
 
 # plotting and maths
@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 # pymoo 
 from pymoo.problems import get_problem
+from pymoo.visualization.scatter import Scatter
 from pymoo.optimize import minimize
 
 # sklearn 
