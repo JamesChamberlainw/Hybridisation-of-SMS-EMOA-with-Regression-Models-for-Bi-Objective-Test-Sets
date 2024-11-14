@@ -10,7 +10,6 @@ import copy
 # pymoo 
 from pymoo.problems import get_problem
 from pymoo.indicators.hv import HV
-from pymoo.indicators.igd import IGD
 
 # sklearn 
 from sklearn.gaussian_process import GaussianProcessRegressor
@@ -38,21 +37,21 @@ smsdefualt_hypervolume_dict = {
 }
 
 D = [5, 10, 30]                                                 # number of decision variables (hav to test for each value)
-# M = 2                                                           # number of objectives (fixed due to the benchmark problem)
+# M = 2                                                         # number of objectives (fixed due to the benchmark problem)
 problems = ["zdt1", "zdt3", "zdt4", "zdt6"]                     # benchmark problems to test
 ref_points = [[1.1, 1.1], [1.1, 1.1], [1.1, 1.1], [1.1, 1.1]]   # reference points for hypervolume calculation (todo find the best ref point)
 
 # generate model dataset
 models = []
-models.append([RandomForestRegressor(), "random forest"])
-models.append([GaussianProcessRegressor(), "gaussian regression"])
-models.append([linear_model.LinearRegression(), "linear regression"])
-models.append([SVR(kernel='poly'), "svr poly"])
-models.append([SVR(kernel='rbf'), "svr rbf"])
-models.append([SVR(kernel='sigmoid'), "svr sigmoid"])
-models.append([SVR(kernel='linear'), "svr linear"])
-models.append([linear_model.BayesianRidge(), "bayesian ridge"])
-models.append([linear_model.SGDRegressor(), "sgd regressor"])
+models.append([RandomForestRegressor(), "Random Forest"])
+models.append([GaussianProcessRegressor(), "Gaussian"])
+models.append([linear_model.LinearRegression(), "Linear"])
+models.append([SVR(kernel='poly'), "SVR Poly Kernal"])
+models.append([SVR(kernel='rbf'), "SVR RBF Kernal"])
+models.append([SVR(kernel='sigmoid'), "SVR Sigmoid Kernal"])
+models.append([SVR(kernel='linear'), "SVR Linear Kernal"])
+models.append([linear_model.BayesianRidge(), "Bayesian Ridge"])
+models.append([linear_model.SGDRegressor(), "SGD"])
 # linear_model.SGDOneClassSVM()
 
 for model in models:
@@ -88,11 +87,11 @@ for model in models:
             # latex table row:
             row = ""
             if D[i] == 5 and problem == "zdt1":
-                row = f"{model[1]} & {problem.upper} & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {IGD(p.pareto_front())(res.F)}& {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
+                row = f"{model[1]} & {problem.upper()} & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
             elif D[i] == 5 and (problem == "zdt3" or problem == "zdt4" or problem == "zdt6"):
-                row = f" & {problem} & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {IGD(p.pareto_front())(res.F)}& {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
+                row = f" & {problem.upper()} & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
             else: 
-                row = f" & & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {IGD(p.pareto_front())(res.F)}& {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
+                row = f" & & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
 
             print(row)
 
