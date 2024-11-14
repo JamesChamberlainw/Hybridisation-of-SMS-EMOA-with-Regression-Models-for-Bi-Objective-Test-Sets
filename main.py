@@ -4,6 +4,9 @@ from hybridsms import Hy_SMSEMOA
 from hybridsms import hy_minimize
 from visulisation import vis   
 
+# copy
+import copy
+
 # plotting and maths
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,6 +26,8 @@ from sklearn import linear_model
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
 from sklearn.linear_model import SGDRegressor
+from sklearn.linear_model import BayesianRidge
+from sklearn.neural_network import MLPRegressor
 
 from sklearn.neural_network import MLPClassifier
 import sklearn.svm 
@@ -53,19 +58,18 @@ ref_points = [[1.1, 1.1], [1.1, 1.1], [1.1, 1.1], [1.1, 1.1]]   # reference poin
 
 # generate model dataset
 models = []
-models.append([SVR(kernel='poly'), "svr_poly"])
-# models.append([GaussianProcessRegressor(), "gaussian_process"])
-# models.append([RandomForestRegressor(), "random_forest"])
-# models.append([linear_model.LinearRegression(), "linear_regression"])
-# model.append([SVR(kernel='rbf'), "svr_rbf"])
-# model.append([SVR(kernel='sigmoid'), "svr_sigmoid"])
-# model.append([linear_model.BayesianRidge(), "bayesian_ridge"])
-# model.append([linear_model.SGDRegressor(), "sgd_regressor"])
-
-# nameing convention for the models MODELNAME_PROBLEMNAME_NVAR_HYPERVOLUME_+/-_CONTRIBUTION
+models.append([RandomForestRegressor(), "random forest"])
+models.append([GaussianProcessRegressor(), "gaussian regression"])
+models.append([linear_model.LinearRegression(), "linear regression"])
+models.append([SVR(kernel='poly'), "svr poly"])
+models.append([SVR(kernel='rbf'), "svr rbf"])
+models.append([SVR(kernel='sigmoid'), "svr sigmoid"])
+models.append([SVR(kernel='linear'), "svr linear"])
+models.append([linear_model.BayesianRidge(), "bayesian ridge"])
+models.append([linear_model.SGDRegressor(), "sgd regressor"])
 
 for model in models:
-    m = model[0]
+    m = copy.deepcopy(model[0])
     row = None
 
     for problem in problems:
@@ -92,11 +96,12 @@ for model in models:
             ind = HV(ref_point)
             hv_value = ind(res.F)
 
-            row = f"{model[1]}, {problem},  {D[i]} : {round(hv_value, rounding)} with similarity {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} at {n_gen} generations, {res.total_evals} evaluations performed out of {res.total_evals_potential} potential evaluations "
+            # row = f"{model[1]}, {problem},  {D[i]} : {round(hv_value, rounding)} with similarity {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} at {n_gen} generations, {res.total_evals} evaluations performed out of {res.total_evals_potential} potential evaluation calls"
+            
+            # latex table row:
+            row = f"{model[1]} & {problem} & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
+            
             print(row)
-
-# res.total_evals = algorithm.survival.eval_counter__ # total evaluations performed by the not by the model
-    # res.total_evals_potential 
 
             # # # Result Visualization
             # plot = vis(res, p.pareto_front())
