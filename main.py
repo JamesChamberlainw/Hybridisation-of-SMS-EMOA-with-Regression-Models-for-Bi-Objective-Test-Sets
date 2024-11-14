@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from pymoo.problems import get_problem
 from pymoo.visualization.scatter import Scatter
 from pymoo.indicators.hv import HV
+from pymoo.indicators.igd import IGD
 
 # sms for comparison
 from pymoo.optimize import minimize
@@ -99,8 +100,12 @@ for model in models:
             # row = f"{model[1]}, {problem},  {D[i]} : {round(hv_value, rounding)} with similarity {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} at {n_gen} generations, {res.total_evals} evaluations performed out of {res.total_evals_potential} potential evaluation calls"
             
             # latex table row:
-            row = f"{model[1]} & {problem} & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
-            
+            row = ""
+            if D[1] == 5:
+                row = f"{model[1]} & {problem} & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {IGD(p.pareto_front())(res.F)}& {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
+            else: 
+                row = f" & {problem} & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {IGD(p.pareto_front())(res.F)}& {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
+
             print(row)
 
             # # # Result Visualization
