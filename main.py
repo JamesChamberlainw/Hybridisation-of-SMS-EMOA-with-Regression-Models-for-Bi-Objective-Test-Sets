@@ -4,34 +4,19 @@ from hybridsms import Hy_SMSEMOA
 from hybridsms import hy_minimize
 from visulisation import vis   
 
-# copy
+# deepcopy 
 import copy
-
-# plotting and maths
-import numpy as np
-import matplotlib.pyplot as plt
 
 # pymoo 
 from pymoo.problems import get_problem
-from pymoo.visualization.scatter import Scatter
 from pymoo.indicators.hv import HV
 from pymoo.indicators.igd import IGD
-
-# sms for comparison
-from pymoo.optimize import minimize
-from pymoo.algorithms.moo.sms import SMSEMOA  # SMS-EMOA
 
 # sklearn 
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn import linear_model
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
-from sklearn.linear_model import SGDRegressor
-from sklearn.linear_model import BayesianRidge
-from sklearn.neural_network import MLPRegressor
-
-from sklearn.neural_network import MLPClassifier
-import sklearn.svm 
 
 # decimal rounding
 rounding = 4
@@ -68,6 +53,7 @@ models.append([SVR(kernel='sigmoid'), "svr sigmoid"])
 models.append([SVR(kernel='linear'), "svr linear"])
 models.append([linear_model.BayesianRidge(), "bayesian ridge"])
 models.append([linear_model.SGDRegressor(), "sgd regressor"])
+# linear_model.SGDOneClassSVM()
 
 for model in models:
     m = copy.deepcopy(model[0])
@@ -101,10 +87,12 @@ for model in models:
             
             # latex table row:
             row = ""
-            if D[1] == 5:
-                row = f"{model[1]} & {problem} & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {IGD(p.pareto_front())(res.F)}& {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
-            else: 
+            if D[i] == 5 and problem == "zdt1":
+                row = f"{model[1]} & {problem.upper} & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {IGD(p.pareto_front())(res.F)}& {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
+            elif D[i] == 5 and (problem == "zdt3" or problem == "zdt4" or problem == "zdt6"):
                 row = f" & {problem} & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {IGD(p.pareto_front())(res.F)}& {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
+            else: 
+                row = f" & & {D[i]} & {n_gen} & {round(hv_value, rounding)} & {IGD(p.pareto_front())(res.F)}& {res.total_evals} & {res.total_evals_potential} & {round(hv_value/smsdefualt_hypervolume_dict[problem][D.index(D[i])], rounding)} \\\\"
 
             print(row)
 
