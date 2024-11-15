@@ -13,11 +13,13 @@
 
 %% Short summary of the report
 \begin{abstract}
- \blindtext 
 
+The use of hypervolume as an indicator for the survival of individuals in a population in SMS-EMOA can be considered as computationally expensive. This study as such explores the use of a variety of regression models to replace approximately half of the hypervolume contribution calculations made by the EA for the\textit{ZDT1},\ \textit{ZDT3}, \textit{ZDT4} and \textit{ZDT6} test sets. \\
  \textbf{key-terms:}
     \textbf{HVC} Hypervolume Contribution,
-    \textbf{SMS-EMOA}
+    \textbf{SMS-EMOA}: Selector Mechanism Survival-based Evolutionary Multi-Objective Algorithm,
+    \textbf{EA} Evolutionary Algorithm,
+    \textbf{MOEA} Multi-Objective Evolutionary Algorithm.
 \end{abstract}
 
 %% builds the first part of the formatted document.
@@ -25,20 +27,18 @@
 
 \section{Introduction}
 
-A key distinction to make is between Hypervolume and HVC these are linked but HVC builds upon the concept of hypervolume and while using it allows us to distinguish between solutions/individuals that do not contribute much to the whole Hypervolume as a whole. 
+The hypervolume indicator is one of the most widely used performance indicators used in indicator-based MOEAs such as SMS-EMOA. Hypervolume as an indicator itself has a problem that it quickly becomes computationally expensive as you increase the population and-or number of objectives, as such this study looks into the use of various regression models through a surrogate model approach periodically swapping between actual hyper volume calculations (HVC) and the surrogate (regression) model.  \\
 
-When talking about hypervolume when we really mean area for the \textit{ZDT} sets as they use a 2 dimensional objective spaces. TODO: FINISH THIS LINE 
+\noindent In this brief study the following regression models were explored: SVG, RF, and standard Linear Regression (generally the linear regression model variations all suffered from the same seen in the standard one as such only the standard one is discussed here). \\
 
- \blindtext 
- \blindtext 
+\noindent Here we discuss in the majority of this for 10 survival function calls thus swapping every 10 times the hypervolume contribution is calculated, this is mainly because less resulted in unrestrained models (setting up the MOEA in the wrong direction), and over this would for the test sets be too few swaps meaning it wouldn't be a fair comparison as a much lower percentage of calls are made due to there being so few generations before convergence.  \\
 
-introduction text goes here 
-
-This whole paper is written with the assumption that hypervolume calculations are computationally expensive. 
+\noindent This paper is split into four major sections, the first being \textit{Numerical Experiments \ref{numerical}}, here the implementation and comparison metrics are discussed so that a true comparison can be made between the original and the hybrid SMS-EMOA can be compared. In the next section there is the \textit{Analysis \ref{analysis}} session what covers some interesting findings, ordered from worst to best performing surrogate models, ending with a little bit of analysis on number of evaluation calls and the swapping mechanism.
 
 \balance
 
 \section{Numerical experiments}
+\label{numerical}
 
 This sections is divided into two major subsections. The first discussing the implemented hybridisation of SMS-EMOA \ref{hybrid}, The second covering default behaviour of SMS-EMOA and the comparison metrics that are utilised and discussed throughout this paper. 
 
@@ -75,12 +75,14 @@ It was found that working with a flip rate of less than 10 fronts would mean tha
 \end{algorithm}
 % \textbf{Note:} The algorithm above shows the pseudo code of changes made to achieve these results - excluding standardisation of some data to make it more readable 
 
+\noindent This is all implemented using an extended version of the \textit{pymoo} \cite{pymoo} library extending the survival function found in \textit{sms.py}. The models used throughout this are all from \textit{scikit-learn} \cite{scikit-learn}
+
  \subsection{SMS-EMOA Default Behaviour and Metrics}
 
 The number of Decision Variables tested for each set are $5$, $10$ or $30$. 
-Test Sets: \textit{ZDT1}, \textit{ZDT3}, \textit{ZDT4}, \textit{ZDT6}
+Test Sets: \textit{ZDT1}, \textit{ZDT3}, \textit{ZDT4}, \textit{ZDT6} \\
 
-\vspace{0.5em}
+\noindent These values in the table below is the primary data used for comparisons and evaluating the models used in the remainder of this report as they are used as what the model should produce given the same input, obviously with predictions that not possible but these are the best case scenarios. 
 
 \begin{center}
 \begin{tabular}{c|c|c|c}
@@ -103,8 +105,6 @@ Test Sets: \textit{ZDT1}, \textit{ZDT3}, \textit{ZDT4}, \textit{ZDT6}
 
 \textbf{Note}: all of the hypervolume/areas calculated within this paper are using the reference point of $(1.1, 1.1)$. The generations to convergence were calculated to nearest 10 and are selected via visual inspecting of the front against the real test set Pareto front. \\
 
-\noindent These values in the table above is the primary data used for comparisons and evaluating the models used in the remainder of this report as they are used as what the model should produce given the same input, obviously with predictions that not possible but these are the best case scenarios. 
-
 \subsubsection{The Similarity Metric}  
 
 Represents how well the hybrid version of SMS-EMOA performed against the original model.
@@ -115,11 +115,9 @@ $$
 
 $0 < similarity \leq 0.90$ - poor representation with large gaps in the front or only cover a small portion of the front. \\
 
-$0.9 < similarity \leq 0.995 $ - decent results here most of the front is covered with but there is very poor diversity and potentially some quite large gaps \\
+$0.9 < similarity \leq 0.995 $ - decent results here most of the front is covered partially but there is very poor diversity and potentially some quite large missing sections along the front. \\
 
-$0.995 < similarity \leq 0.99 $ - no major gaps in the solution but either has a small gap at one side of the front is not distributed evenly. Overall these are a very good set of solutions.  \\
-
-$0.99 < similarity \leq 1.01$ - should be considered on-par with the original SMS-EMOA for this test. \\ Values greater than $1.00$ can be found are perform better than the original model, these are due to a quirk in how the specific models work and the shape of the Pareto front - just look at the standard Linear Regression for \textit{ZDT6} with $5$ decision variables it achieves a similarity score of $1.0037$ (Table \ref{Table1}).
+$0.995 < similarity \leq 0.99 $ - no major gaps in the solution. Overall these represent very good set of solutions with only minor gaps.  $0.99 < similarity \leq 1.01$ - should be considered on-par with the original SMS-EMOA for this test. \\ Values greater than $1.00$ can be found and show the model performing  "better" than the original model, these are due to a quirk in how the specific models works and are not an overall indicator that they are better way of performing hypervolume calculations or as an indicator only that they are on-par.
 
 \subsubsection{Call Reduction Metric} 
 
@@ -141,24 +139,13 @@ The results discussed can be seen in Table \ref{Table1}, more than this were gen
 
  
 \section{Analysis}
-
-
-
-
-
-
-
-
-
-
-
-
+\label{analysis}
 
 \subsection{Linear Regression: an interesting observation}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\linewidth]{Images/LinearRegression.png}
+    \includegraphics[width=0.85\linewidth]{Images/LinearRegression.png}
     \caption{ZDT6 (Table \ref{Table1}) Linear Regression for 10 and 5 decision variables}
     \label{fig:linear-regression-two}
 \end{figure}
@@ -167,49 +154,21 @@ The results discussed can be seen in Table \ref{Table1}, more than this were gen
 
 \noindent During testing it was found that once it converges upon an extreme, the EA pushes itself slows towards more extreme sets of solutions with a progressive lowering of diversity. This in part is due to how this the EA works in the \textit{pymoo} library with no active recall to the best previous solution (as it does not calculate overall hypervolume instead works on a selection and rejection process for the population based upon the hybrid HVC and model predictions. \\
 
-\noindent Linear regression fits well to \textit{ZDT6} as shown in figure \ref{fig:linear-regression-two}b and for 30 decision variables overall it performs decently compared to how it usually performs. This likely occurs on \textit{ZDT6} especially as there is such a small change in the gradient as such a linear line could be fit close to it. 
+\noindent Linear regression fits surprisingly well to \textit{ZDT6} as shown in figure \ref{fig:linear-regression-two}b and for 30 decision variables overall it performs decently compared to how it usually performs. This likely occurs on \textit{ZDT6} especially as there is such a small change in the gradient as such a linear line could be fit close to it. \\
 
-
+\noindent Overall most linear regression models perform quite poorly as a surrogate model, this could in part be due to the fact that at the beginning the EA does not produce good initial data, and this could be a large part on explaining why it doesn't find even larger sections of the front. This suggests that yes it does once its stuck on an extreme push it further into that extreme, but in quite a few of the tests sets discussed a better line could be easily drawn this could potentially be due to the EA starting out poorly that starts it on this path. 
 
 \subsection{Random Forrest}
 
+
+Figure \ref{fig:rf} shows the RF, it performs really well on highest two steps and performs worst on the 3rd and 4th one down and only has a minor gap in the middle of the final lowest step. Overall RF performs very well on all sets for 10 decision variables and much worse on 5 and 30. 
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\linewidth]{Images/SMS_vs_RF.png}
+    \includegraphics[width=0.85\linewidth]{Images/SMS_vs_RF.png}
     \caption{Random Forrest in one of the few cases it performs well}
     \label{fig:rf}
 \end{figure}
-
-Figure \ref{fig:rf} shows the RF, it performs really well on highest two steps and performs worst on the 3rd and 4th one down and only has a minor gap in the middle of the final lowest step. \\ 
-
-\noindent Overall RF performs very well on all sets for 10 decision variables and much worse on 5 and 30. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 \subsection{Support Vector Regression (SVR): the best for modelling hypervolume (found*)}
 
@@ -224,7 +183,11 @@ Figure \ref{fig:rf} shows the RF, it performs really well on highest two steps a
 
 \noindent In figure \ref{fig:svr-poly} it can be seen that it generally finds the front and has a good distribution across it with only two small points where there is not the greatest diversity, however comparing this is using $44.12\%$ of the original calls for calculating HVC, this should be considered very good and even matches 0.9964 (pretty much within 0.36\% similarity to the overall hypervolume of the original SMS-EMOA model for the same number of generations). \\
 
-Why is SVR working so well to model and learn the space based on previous hypervolume contribution calculations? Well this is likely because SVR creates support vectors in the space and can then use them to guide the regression line across these points. Using the kernels RFB or Poly (degree of 3 here is set so up to (so a cubic relationship is drawn)) allow for these points to map a non-linear regression line.
+\noindent Why is SVR working so well to model and learn the space based on previous hypervolume contribution calculations? Well this is likely because SVR creates support vectors in the space and can then use them to guide the regression line across these points. Using the kernels RFB or Poly (degree of 3 here is set so up to (so a cubic relationship is drawn)) allow for these points to map a non-linear regression line.
+
+In the figure \ref{fig:SVR-2} this highlights some interesting, this shows that the zdt1 for 10 decision variables (Table \ref{Table1} and fig \ref{fig:svr-poly} / \ref{fig:SVR-2}) has some issues with modelling this data at certain points, ultimately this could potentially introduce some error but at these points the model is still improving this therefore suggests that where it continues on from the training set (seen in blue) the model is over predicting massively - these over predictions as they are only used as selection criteria does not seem to have a major effect on the results.  
+
+The first model prediction set (orange) occurs most of the time, and this is likely due to the dataset chaining so much during its set of 10 predictions as such it starts over predicting when its converging. The remainder of the set where it is not over predicting, other than it progressively gets closer to the mean contribution, suggesting that as it begins to settle along Pareto front the distribution is getting better.  
 
 \begin{figure}[H]
     \centering
@@ -233,9 +196,11 @@ Why is SVR working so well to model and learn the space based on previous hyperv
     \label{fig:SVR-2}
 \end{figure}
 
-In the figure above this highlights some interesting, this shows that the zdt1 for 10 decision variables (Table \ref{Table1} and fig \ref{fig:svr-poly} / \ref{fig:SVR-2}) has some issues with modelling this data at certain points, ultimately this could potentially introduce some error but at these points the model is still improving this therefore suggests that where it continues on from the training set (seen in blue) the model is over predicting massively - these over predictions as they are only used as selection criteria does not seem to have a major effect on the results.  \\ 
+\subsection{Call Reduction and Swapping Number}
 
-The first model prediction set (orange) occurs most of the time, and this is likely due to the dataset chaining so much during its set of 10 predictions as such it starts over predicting when its converging. The remainder of the set where it is not over predicting, other than it progressively gets closer to the mean contribution, suggesting that as it begins to settle along Pareto front the distribution is getting better. \\ 
+The call reduction in the tested cases will tend towards $50\%$ in all of these tested cases, this is due to it swapping every 10, and 10 generations does not exactly mean there will be 10 front HVC calls.
+
+What was found for these test sets especially for low number of generations before convergence (i.e., less than 150) increasing the number before swapping between model and default HVC calculations would dramatically decrease the amount of reduced calls (due to it starting first on the default HVC calculations). This will still tend towards $50\%$. An additional finding is that the models would then generally either over preform slightly as an indicator or would fail massively when comparing similarity against its default counter parts. 
 
 \section{Conclusion}
 
@@ -243,13 +208,10 @@ In conclusion SVR using either the Poly or the RBF kernal perform best for mimic
 
 \noindent Overall the reduction is generally very good and tends towards $50\%$ (this is likely because the \textit{pymoo} implantation does not call the survival function every generation this can only be assumed to be due to a generation being too small?) but for the tests often fall more towards $45\%$
 
-\bibliographystyle{ACM-Reference-Format}
-\bibliography{references} 
-
 \centering
 
-\begin{table*}[b] 
-\caption{Performance Against unaltered SMS-EMOA \textit{pymoo} \& \textit{sklearn}}
+\begin{table}[!htbp]
+\caption{Performance Against original SMS-EMOA}
 \begin{tabular}{l|llllll|l|l}
 \label{Table1}
  & & Decision & & Final\ \ \ \ (4.s.f) & Actual & Potential & Similarity (1) & call \\ 
@@ -294,7 +256,12 @@ Linear & ZDT6 & 5 & 130 & 0.4978 & 67 & 127 & 1.0037 & 47.24\% \\
  & & 10 & 230 & 0.3385 & 110 & 220 & 0.6903 & 50.0\% \\
  & & 30 & 600 & 0.4832 & 298 & 588 & 0.9866 & 49.32\% \\
 \end{tabular} 
-\end{table*}
+\end{table}
 
+
+\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ \\ \ \\\ 
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references} 
 
 \end{document}
