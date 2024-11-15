@@ -33,9 +33,9 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
     __missing_evals_unused__ = []
 
     # switch between model and actual hypervolume evaluation``
-    __n_model_swap__ = 20           # number before swapping
+    __n_model_swap__ = 10           # number before swapping
     __bool_model_eval__ = False     # current state
-    __counter_model_eval__ = 1      # counter (default: 1) - lower values mean more data for first model evaluation
+    __counter_model_eval__ = 0      # counter (default: 1) - lower values mean more data for first model evaluation
 
     # statistic variables 
     eval_counter__ = 0                  # all evaluations perfromed by the model
@@ -101,13 +101,13 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
 
                 hv = None
 
+                self.__counter_model_eval__ += 1 # update for current evaluation
                 if self.__model_initialised__:
                     if self.__bool_model_eval__ and self.__counter_model_eval__ <= self.__n_model_swap__: # true
                         hv = self.__model__.predict(F) + self.__average_error__ # - average error to get a better approximation
-                        self.__counter_model_eval__ += 1
 
                         # counters for statistics
-                        self.eval_counter_all_potential__ += 1    # counter for testing purposes
+                        self.eval_counter_all_potential__ += 1                                              # counter for testing purposes
                         self.__hv_actual_over_time__.append(Hypervolume(ref_point = [1.1,1.1]).do(F))       # append the actual hypervolume
                         self.__hv_actual_contrib_over_time__.append(np.NaN)                                 # append NAN as no prediction is made
                         self.__hv_aprox_contrib_over_time__.append(sum(hv))                                 # append contribution of the predicted points hypervolume (whats being calculated here)
@@ -122,7 +122,6 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                     else: 
                         hv = clazz(ref_point).add(F)
                         self.__model__.fit(F, hv.hvc)
-                        self.__counter_model_eval__ += 1
 
                         pred_hv = self.__model__.predict(F) 
                         self.__average_error__ = np.mean(hv.hvc - pred_hv) # calculate the average error for the model
@@ -133,7 +132,7 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                         self.__hv_aprox_contrib_over_time__.append(np.NaN)                                  # append NAN as no prediction is made
                         self.__missing_evals_unused__.append(np.NaN)                                        # append NAN as its actually calculated so no need to append extra data
 
-                        # counters for statistics
+                        # counters
                         self.eval_counter__ += 1    # counter for testing purposes
                         self.eval_counter_all_potential__ += 1 # all potential evaluations even those that are not performed due to the model
 
@@ -144,11 +143,13 @@ class MyLeastHypervolumeContributionSurvival(LeastHypervolumeContributionSurviva
                 else:
                     hv = clazz(ref_point).add(F)
                     self.___current_hv___ = True
-                    self.__hv_actual_over_time__.append(Hypervolume(ref_point = [1.1, 1.1]).do(F)) # DO NOT CHANGE REF_POINT AS ITS FOR EXTERNAL USE NOT INTERNAL 
+                    self.__hv_actual_over_time__.append(Hypervolume(ref_point = [1.1, 1.1]).do(F)) # Does not give as good a stat as I would have thought but that is EAs so...
                     self.__hv_aprox_contrib_over_time__.append(np.NaN)
                     self.__missing_evals_unused__.append(np.NaN)
 
-                    self.eval_counter__ += 1    # counter for testing purposes
+                    # counters
+                    self.eval_counter_all_potential__ += 1
+                    self.eval_counter__ += 1 
 
 
                 # current front sorted by crowding distance if splitting
