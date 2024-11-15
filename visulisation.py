@@ -23,7 +23,7 @@ class vis:
         y = self.__res__.hv_actual 
 
         plt.plot(x, y, label="Hypervolume over time")
-        plt.xlabel("Generation")
+        plt.xlabel("Evaluations")
         plt.ylabel("Hypervolume")
         plt.title("Hypervolume over time")
         plt.show()
@@ -33,8 +33,8 @@ class vis:
 
         # # plot hv actual and hv aprox
         x = np.arange(0, len(self.__res__.hv_actual_contrib), 1)
-        plt.title("Sum of Hypervolume Contribution per Generation")
-        plt.xlabel("Generation")
+        plt.title("Sum of Hypervolume Contribution against Evaluation Number")
+        plt.xlabel("Evaluations")
         plt.ylabel("Hypervolume Contribution")
         plt.plot(x, self.__res__.hv_actual_contrib, label="Actual Contribution (training data)")
         plt.plot(x, self.__res__.hv_aprox_contrib, label="Model Contribution (aprox)")
