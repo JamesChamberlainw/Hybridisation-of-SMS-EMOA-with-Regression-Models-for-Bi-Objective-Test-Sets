@@ -45,16 +45,16 @@ ref_points = [[1.1, 1.1], [1.1, 1.1], [1.1, 1.1], [1.1, 1.1]]   # reference poin
 
 # generate model dataset
 models = []
-# models.append([linear_model.LinearRegression(), "Linear"])        # will be discussed but not used to generate results
-# models.append([RandomForestRegressor(), "Random Forest"])
-# models.append([GaussianProcessRegressor(), "Gaussian"])
-# models.append([SVR(kernel='poly'), "SVR Poly Kernal"])
+models.append([linear_model.LinearRegression(), "Linear"])        # will be discussed but not used to generate results
+models.append([RandomForestRegressor(), "Random Forest"])
+models.append([GaussianProcessRegressor(), "Gaussian"])
+models.append([SVR(kernel='poly'), "SVR Poly Kernal"])
 models.append([SVR(kernel='rbf'), "SVR RBF Kernal"])
-# models.append([SVR(kernel='sigmoid'), "SVR Sigmoid Kernal"])
-# models.append([SVR(kernel='linear'), "SVR Linear Kernal"])
-# models.append([linear_model.BayesianRidge(), "Bayesian Ridge"])
-# models.append([linear_model.SGDRegressor(), "SGD"])
-# linear_model.SGDOneClassSVM()
+models.append([SVR(kernel='sigmoid'), "SVR Sigmoid Kernal"])
+models.append([SVR(kernel='linear'), "SVR Linear Kernal"])
+models.append([linear_model.BayesianRidge(), "Bayesian Ridge"])
+models.append([linear_model.SGDRegressor(), "SGD"])
+linear_model.SGDOneClassSVM()
 
 for model in models:
     m = copy.deepcopy(model[0])
@@ -101,5 +101,5 @@ for model in models:
             # # Result Visualization
             plot = vis(res, p.pareto_front())
             plot.display_front()
-            # plot.display_hypervolume_overtime()
-            # plot.display_aprox_contrib_overtime()
+            plot.display_hypervolume_overtime()
+            plot.display_aprox_contrib_overtime()
